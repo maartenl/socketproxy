@@ -19,21 +19,24 @@ package socketproxy;
 import java.io.IOException;
 
 /**
+ * A probably command line would be: "java -classpath socketproxy.jar Main 3300
+ * foreign.server.com 80".
  *
  * @author maartenl
  */
-public class Main
-{
+public class Main {
 
     /**
-     * @param args the command line arguments
+     * @param args the command line arguments, needs at least three,
+     * the client port to listen to, the hostname of the server and port of the
+     * server to redirect traffic to.
      * @throws java.io.IOException
      */
-    public static void main(String[] args) throws IOException
-    {
+    public static void main(String[] args) throws IOException {
         int proxyPort = Integer.parseInt(args[0]);
-        int serverPort = Integer.parseInt(args[1]);
-        SocketProxyServer proxy = new SocketProxyServer(proxyPort, serverPort);
+        String serverHost = args[1];
+        int serverPort = Integer.parseInt(args[2]);
+        SocketProxyServer proxy = new SocketProxyServer(proxyPort, serverHost, serverPort);
         SocketListener listener = new SimpleSocketListener();
         proxy.addListener(listener);
         proxy.startServer();

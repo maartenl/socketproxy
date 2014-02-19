@@ -18,6 +18,7 @@ package socketproxy;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -28,19 +29,22 @@ import java.net.ServerSocket;
 public class SocketProxyServer {
 
     private SocketListener listener;
-    private int proxyPort;
-    private int serverPort;
+    private final int proxyPort;
+    private final int serverPort;
+    private final String serverHost;
 
     /**
      *
+     * @param serverHost hostname/ip address of the server to forward messages to.
      * @param proxyPort the port that this deamon will listen on
      * @param serverPort the port that this daemon will forward all messages to
      * the <i>actual</i> server.
      * @throws IOException
      */
-    public SocketProxyServer(int proxyPort, int serverPort) throws IOException {
+    SocketProxyServer(@Nonnull int proxyPort, @Nonnull String serverHost, @Nonnull int serverPort) {
         this.proxyPort = proxyPort;
         this.serverPort = serverPort;
+        this.serverHost = serverHost;
     }
 
     public void startServer() throws IOException {
@@ -48,7 +52,7 @@ public class SocketProxyServer {
                 ServerSocket serverSocket = new ServerSocket(proxyPort)) {
             boolean listening = true;
             while (listening) {
-                new SocketProxyThread(serverSocket.accept(), listener).start();
+                new SocketProxyThread(serverSocket.accept(), listener, serverHost, serverPort).start();
             }
         }
     }

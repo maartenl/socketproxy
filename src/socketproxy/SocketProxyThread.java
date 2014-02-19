@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nonnull;
 
 /**
  *
@@ -33,34 +34,65 @@ import java.util.logging.Logger;
 class SocketProxyThread extends Thread {
 
     private Socket socket = null;
-    
-    private SocketListener listener;
-    
+
+    private final SocketListener listener;
+
     private final List<Message> messages = new ArrayList<>();
 
-    public SocketProxyThread(Socket socket, SocketListener listener) {
+    private final String serverHost;
+
+    private final int serverPort;
+
+    SocketProxyThread(@Nonnull Socket socket, @Nonnull SocketListener listener, @Nonnull String serverHost, @Nonnull int serverPort) {
         super("SocketProxyThread");
         this.socket = socket;
         this.listener = listener;
+        this.serverHost = serverHost;
+        this.serverPort = serverPort;
     }
 
     @Override
     public void run() {
         try (
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(
-                                socket.getInputStream()));) {
-            String inputLine, outputLine;
+                Socket serverSocket = new Socket(serverHost, serverPort);
+                PrintWriter server_out = new PrintWriter(serverSocket.getOutputStream(), true);
+                BufferedReader server_in = new BufferedReader(
+                        new InputStreamReader(serverSocket.getInputStream()));) {
 
-            while ((inputLine = in.readLine()) != null) {
-                messages.add(new Message(TransportEnum.CLIENT, inputLine.getBytes()));
-                break;
+            try (
+                    PrintWriter client_out = new PrintWriter(socket.getOutputStream(), true);
+                    BufferedReader client_in = new BufferedReader(
+                            new InputStreamReader(
+                                    socket.getInputStream()));) {
+                String client_inputLine, client_outputLine;
+                String server_inputLine, server_outputLine;
+
+                // repeat until closed
+                while (!socket.isClosed()) {
+                    // retrieve stuff from client,
+                    // send it onwards to the server
+                    while ((client_inputLine = client_in.readLine()) != null) {
+                        messages.add(new Message(TransportEnum.CLIENT, client_inputLine.getBytes()));
+                        server_out.println(client_inputLine);
+                        break;
+                    }
+                    // retrieve stuff from server
+                    // send it onwards to the client
+                    while ((server_inputLine = server_in.readLine()) != null) {
+                        messages.add(new Message(TransportEnum.SERVER, server_inputLine.getBytes()));
+                        client_out.println(server_inputLine);
+                        break;
+                    }
+                }
+                socket.close();
+                serverSocket.close();
+            } catch (IOException ex) {
+                Logger.getLogger(SocketProxyThread.class.getName()).log(Level.SEVERE, null, ex);
             }
-            socket.close();
         } catch (IOException ex) {
             Logger.getLogger(SocketProxyThread.class.getName()).log(Level.SEVERE, null, ex);
         }
+        listener.communication(messages);
     }
 
 }
