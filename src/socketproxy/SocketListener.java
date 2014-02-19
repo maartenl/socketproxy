@@ -15,22 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package socketproxy;
 
 /**
- *
+ * Listener that will receive the communication detected.
  * @author maartenl
  */
-public class SocketProxy
+public interface SocketListener
 {
+    /**
+     * Sent from the client to the server.
+     * @param message 
+     */
+    public void sent(byte[] message);
 
     /**
-     * @param args the command line arguments
+     * Received from the server, for the client.
+     * @param message 
      */
-    public static void main(String[] args)
-    {
-        // TODO code application logic here
-    }
-    
+    public void received(byte[] message);
 }
