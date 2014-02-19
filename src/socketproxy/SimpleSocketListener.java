@@ -14,22 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package socketproxy;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 /**
- * Listener that will receive the communication detected.
+ *
  * @author maartenl
  */
-public interface SocketListener
-{
-    /**
-     * Messages concerning one socket session.
-     * @param messages list of messages in order of arrival.
-     */
-    public void communication(@Nonnull List<Message> messages);
+class SimpleSocketListener implements SocketListener {
+
+    public SimpleSocketListener() {
+    }
+
+    @Override
+    public void communication(List<Message> messages) {
+        for (Message message : messages) {
+            if (message.getTransport() == TransportEnum.CLIENT) {
+                System.out.println("received from client:{" + new String(message.getMessage()) + "}");
+            } else {
+                System.out.println("received from server:{" + new String(message.getMessage()) + "}");
+            }
+        }
+
+    }
 
 }

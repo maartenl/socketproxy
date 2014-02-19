@@ -17,19 +17,10 @@
 
 package socketproxy;
 
-import java.util.List;
-import javax.annotation.Nonnull;
-
 /**
- * Listener that will receive the communication detected.
+ *
  * @author maartenl
  */
-public interface SocketListener
-{
-    /**
-     * Messages concerning one socket session.
-     * @param messages list of messages in order of arrival.
-     */
-    public void communication(@Nonnull List<Message> messages);
-
+public enum TransportEnum {
+    SERVER, CLIENT
 }

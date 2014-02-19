@@ -14,23 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 package socketproxy;
+
+import java.io.IOException;
 
 /**
  *
  * @author maartenl
  */
-public class SocketProxy
+public class Main
 {
 
     /**
      * @param args the command line arguments
+     * @throws java.io.IOException
      */
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
-        // TODO code application logic here
+        int proxyPort = Integer.parseInt(args[0]);
+        int serverPort = Integer.parseInt(args[1]);
+        SocketProxyServer proxy = new SocketProxyServer(proxyPort, serverPort);
+        SocketListener listener = new SimpleSocketListener();
+        proxy.addListener(listener);
+        proxy.startServer();
     }
-    
 }
