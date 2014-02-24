@@ -22,21 +22,37 @@ import java.util.List;
  *
  * @author maartenl
  */
-class SimpleSocketListener implements SocketListener {
+class SimpleSocketListener implements SocketListener
+{
 
-    public SimpleSocketListener() {
+    public SimpleSocketListener()
+    {
     }
 
     @Override
-    public void communication(List<Message> messages) {
-        for (Message message : messages) {
-            if (message.getTransport() == TransportEnum.CLIENT) {
-                System.out.println("received from client:{" + new String(message.getMessage()) + "}");
-            } else {
-                System.out.println("received from server:{" + new String(message.getMessage()) + "}");
+    public void communication(List<Message> messages)
+    {
+        for (Message message : messages)
+        {
+            switch (message.getTransport())
+            {
+                case CLIENT:
+                    System.out.println("received from client:{" + new String(message.getMessage()) + "}");
+                    break;
+                case SERVER:
+                    System.out.println("received from server:{" + new String(message.getMessage()) + "}");
+                    break;
+                case CLIENT_CLOSED_CONNECTION:
+                    System.out.println("client closed connection.");
+                    break;
+                case SERVER_CLOSED_CONNECTION:
+                    System.out.println("server closed connection.");
+                    break;
+                default:
+                    throw new RuntimeException("unknown transport type : " + message.getTransport());
             }
-        }
 
+        }
     }
 
 }

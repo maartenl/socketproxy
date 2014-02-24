@@ -17,6 +17,7 @@
 
 package socketproxy;
 
+import java.util.Arrays;
 import javax.annotation.Nonnull;
 
 /**
@@ -25,7 +26,7 @@ import javax.annotation.Nonnull;
  */
 public class Message {
 
-    private final byte[] message;
+    private final char[] message;
     
     private final TransportEnum transport;
 
@@ -33,16 +34,23 @@ public class Message {
      *
      * @param transport
      * @param message
+     * @param size
      */
-    public Message(@Nonnull TransportEnum transport, @Nonnull byte[] message) {
-        this.message = message;
+    public Message(@Nonnull TransportEnum transport, @Nonnull char[] message, int size) {
+        this.message = Arrays.copyOf(message, size);
         this.transport = transport;
+    }
+
+    Message(TransportEnum transport)
+    {
+        this.transport = transport;
+        this.message = null;
     }
 
     /**
      * @return the message
      */
-    public @Nonnull byte[] getMessage() {
+    public @Nonnull char[] getMessage() {
         return message;
     }
 

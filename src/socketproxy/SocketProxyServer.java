@@ -48,6 +48,7 @@ public class SocketProxyServer {
     }
 
     public void startServer() throws IOException {
+        System.out.println("Start listening at port " + proxyPort);
         try (
                 ServerSocket serverSocket = new ServerSocket(proxyPort)) {
             boolean listening = true;

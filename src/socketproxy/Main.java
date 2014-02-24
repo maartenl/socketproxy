@@ -28,7 +28,8 @@ public class Main {
 
     /**
      * @param args the command line arguments, needs at least three,
-     * the client port to listen to, the hostname of the server and port of the
+     * the proxy port to listen to for client connections, 
+     * the hostname of the server and port of the
      * server to redirect traffic to.
      * @throws java.io.IOException
      */

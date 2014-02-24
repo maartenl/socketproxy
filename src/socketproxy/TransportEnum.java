@@ -22,5 +22,5 @@ package socketproxy;
  * @author maartenl
  */
 public enum TransportEnum {
-    SERVER, CLIENT
+    SERVER, CLIENT, CLIENT_CLOSED_CONNECTION, SERVER_CLOSED_CONNECTION
 }
