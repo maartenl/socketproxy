@@ -18,6 +18,8 @@ package socketproxy;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 
 /**
@@ -28,10 +30,16 @@ import javax.annotation.Nonnull;
  */
 public class SocketProxyServer {
 
+     private static final Logger logger = Logger.getLogger(SocketProxyServer.class.getName());
+     
     private SocketListener listener;
+    
     private final int proxyPort;
+    
     private final int serverPort;
+    
     private final String serverHost;
+    
 
     /**
      *
@@ -48,7 +56,7 @@ public class SocketProxyServer {
     }
 
     public void startServer() throws IOException {
-        System.out.println("Start listening at port " + proxyPort);
+        logger.log(Level.FINE, "Start listening at port {0}", proxyPort);
         try (
                 ServerSocket serverSocket = new ServerSocket(proxyPort)) {
             boolean listening = true;

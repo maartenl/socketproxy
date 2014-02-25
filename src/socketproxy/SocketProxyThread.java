@@ -34,7 +34,14 @@ import javax.annotation.Nonnull;
 class SocketProxyThread extends Thread
 {
 
+    private static final Logger logger = Logger.getLogger(SocketProxyThread.class.getName());
+
     public static final int BUFFER_SIZE = 1024;
+
+    /**
+     * default timeout in milliseconds. 30 seconds outta do it.
+     */
+    private static final int SOCKET_TIMEOUT = 30000;
 
     /**
      * The socket on which the client connection entered the system.
@@ -49,6 +56,18 @@ class SocketProxyThread extends Thread
 
     private final int serverPort;
 
+    public String msgAsString(char[] msg, int length)
+    {
+        StringBuilder sb = new StringBuilder("");
+        for (int i = 0; i < length; i++)
+        {
+            char b = msg[i];
+            // FIXME: autowidening, if the msb is 1, the hex string becomes 0xffffffXX
+            sb.append("0x").append(Integer.toHexString(b)).append(' ');
+        }
+        return sb.toString();
+    }
+
     SocketProxyThread(@Nonnull Socket socket, @Nonnull SocketListener listener, @Nonnull String serverHost, @Nonnull int serverPort)
     {
         super("SocketProxyThread");
@@ -61,7 +80,7 @@ class SocketProxyThread extends Thread
     @Override
     public void run()
     {
-        System.out.println("Connection accepted");
+        logger.fine("Connection accepted");
         try (
                 Socket serverSocket = new Socket(serverHost, serverPort);
                 PrintWriter server_out = new PrintWriter(serverSocket.getOutputStream(), true);
@@ -75,6 +94,9 @@ class SocketProxyThread extends Thread
                             new InputStreamReader(
                                     socket.getInputStream()));)
             {
+                serverSocket.setSoTimeout(SOCKET_TIMEOUT);
+                serverSocket.setKeepAlive(false);
+                serverSocket.setSoLinger(false, 0);
                 char[] client_inputLine = new char[BUFFER_SIZE];
                 char[] client_outputLine = new char[BUFFER_SIZE];
                 char[] server_inputLine = new char[BUFFER_SIZE];
@@ -90,9 +112,13 @@ class SocketProxyThread extends Thread
                         int numbers = client_in.read(client_inputLine);
                         if (numbers > 0)
                         {
+                            logger.fine(">" + new String(client_inputLine, 0, numbers));
+                            logger.fine(">" + msgAsString(client_inputLine, numbers));
                             messages.add(new Message(TransportEnum.CLIENT, client_inputLine, numbers));
+                            logger.fine("Writing to server");
                             server_out.write(client_inputLine, 0, numbers);
-                            System.out.println(">" + new String(client_inputLine, 0, numbers));
+                            logger.fine("Flushing server");
+                            server_out.flush();
                         }
                     }
 
@@ -103,34 +129,40 @@ class SocketProxyThread extends Thread
                         int numbers = server_in.read(server_inputLine);
                         if (numbers > 0)
                         {
+                            logger.fine("<" + new String(server_inputLine, 0, numbers));
+                            logger.fine(">" + msgAsString(server_inputLine, numbers));
                             messages.add(new Message(TransportEnum.SERVER, server_inputLine, numbers));
+                            logger.fine("Writing to client");
                             client_out.write(server_inputLine, 0, numbers);
-                            System.out.println("<" + new String(server_inputLine, 0, numbers));
+                            logger.fine("Flushing client");
+                            client_out.flush();
                         }
                     }
                     if (socket.isClosed())
                     {
                         messages.add(new Message(TransportEnum.CLIENT_CLOSED_CONNECTION));
-                        System.out.println("client closed");
+                        logger.fine("client closed");
 
                         break;
                     }
                     if (serverSocket.isClosed())
                     {
                         messages.add(new Message(TransportEnum.SERVER_CLOSED_CONNECTION));
-                        System.out.println("server closed");
+                        logger.fine("server closed");
                         break;
                     }
                 }
+                socket.shutdownOutput();
+                serverSocket.shutdownOutput();
                 socket.close();
                 serverSocket.close();
             } catch (IOException ex)
             {
-                Logger.getLogger(SocketProxyThread.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
         } catch (IOException ex)
         {
-            Logger.getLogger(SocketProxyThread.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         }
 
         listener.communication(messages);
