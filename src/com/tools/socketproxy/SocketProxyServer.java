@@ -64,7 +64,7 @@ public class SocketProxyServer
      * the <i>actual</i> server.
      * @throws IOException
      */
-    SocketProxyServer(@Nonnull int proxyPort, @Nonnull String serverHost, @Nonnull int serverPort)
+    public SocketProxyServer(@Nonnull int proxyPort, @Nonnull String serverHost, @Nonnull int serverPort)
     {
         this.proxyPort = proxyPort;
         this.serverPort = serverPort;
