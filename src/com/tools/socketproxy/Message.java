@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package socketproxy;
+package com.tools.socketproxy;
 
 import java.util.Arrays;
 import javax.annotation.Nonnull;
