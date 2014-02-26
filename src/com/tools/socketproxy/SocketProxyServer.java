@@ -16,20 +16,23 @@
  */
 package com.tools.socketproxy;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 
 /**
- *
+ * A fairly simple socket server.
+ * <img src="../../../images/SocketProxyServer.png"/>
+ * @startuml
+ * SocketProxyServer: +startServer()
+ * SocketProxyServer: +addListener(listener: SocketListener)
+ * SocketListener <-- SocketProxyServer
+ * TalkingProxyThread <-- SocketProxyServer
+ * TalkingServerThread <-- SocketProxyServer
+ * @enduml
  * @author maartenl
  * @see
  * http://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html
