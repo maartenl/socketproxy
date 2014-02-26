@@ -16,8 +16,14 @@
  */
 package socketproxy;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -28,45 +34,63 @@ import javax.annotation.Nonnull;
  * @see
  * http://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html
  */
-public class SocketProxyServer {
+public class SocketProxyServer
+{
 
-     private static final Logger logger = Logger.getLogger(SocketProxyServer.class.getName());
-     
+    private static final Logger logger = Logger.getLogger(SocketProxyServer.class.getName());
+
+    /**
+     * default timeout in milliseconds. 30 seconds outta do it.
+     */
+    private static final int SOCKET_TIMEOUT = 30000;
+
     private SocketListener listener;
-    
+
     private final int proxyPort;
-    
+
     private final int serverPort;
-    
+
     private final String serverHost;
-    
 
     /**
      *
-     * @param serverHost hostname/ip address of the server to forward messages to.
+     * @param serverHost hostname/ip address of the server to forward messages
+     * to.
      * @param proxyPort the port that this deamon will listen on
      * @param serverPort the port that this daemon will forward all messages to
      * the <i>actual</i> server.
      * @throws IOException
      */
-    SocketProxyServer(@Nonnull int proxyPort, @Nonnull String serverHost, @Nonnull int serverPort) {
+    SocketProxyServer(@Nonnull int proxyPort, @Nonnull String serverHost, @Nonnull int serverPort)
+    {
         this.proxyPort = proxyPort;
         this.serverPort = serverPort;
         this.serverHost = serverHost;
     }
 
-    public void startServer() throws IOException {
-        logger.log(Level.FINE, "Start listening at port {0}", proxyPort);
+    public void startServer() throws IOException
+    {
+        logger.log(Level.FINE, "Start listening on port {0}", proxyPort);
         try (
-                ServerSocket serverSocket = new ServerSocket(proxyPort)) {
+                ServerSocket proxyServerSocket = new ServerSocket(proxyPort))
+        {
             boolean listening = true;
-            while (listening) {
-                new SocketProxyThread(serverSocket.accept(), listener, serverHost, serverPort).start();
+            while (listening)
+            {
+                final Socket clientSocket = proxyServerSocket.accept();
+                logger.fine("Connection accepted");
+                Socket serverSocket = new Socket(serverHost, serverPort);                
+                serverSocket.setSoTimeout(SOCKET_TIMEOUT);
+                serverSocket.setKeepAlive(false);
+                serverSocket.setSoLinger(false, 0);
+                new TalkingProxyThread(clientSocket, serverSocket, listener).start();
+                new TalkingServerThread(clientSocket, serverSocket, listener).start();
             }
         }
     }
 
-    public void addListener(SocketListener listener) {
+    public void addListener(SocketListener listener)
+    {
         this.listener = listener;
     }
 
