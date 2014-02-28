@@ -19,6 +19,9 @@ package com.tools.socketproxy;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -43,7 +46,7 @@ public class SocketProxyServer
     private static final Logger logger = Logger.getLogger(SocketProxyServer.class.getName());
 
     /**
-     * default timeout in milliseconds. 30 seconds outta do it.
+     * default timeout in milliseconds. 30 seconds ought to do it.
      */
     private static final int SOCKET_TIMEOUT = 30000;
 
@@ -73,6 +76,7 @@ public class SocketProxyServer
     public void startServer() throws IOException
     {
         logger.log(Level.FINE, "Start listening on port {0}", proxyPort);
+        ExecutorService pool = Executors.newFixedThreadPool(50);
         try (
                 ServerSocket proxyServerSocket = new ServerSocket(proxyPort))
         {
@@ -85,8 +89,8 @@ public class SocketProxyServer
                 serverSocket.setSoTimeout(SOCKET_TIMEOUT);
                 serverSocket.setKeepAlive(false);
                 serverSocket.setSoLinger(false, 0);
-                new TalkingProxyThread(clientSocket, serverSocket, listener).start();
-                new TalkingServerThread(clientSocket, serverSocket, listener).start();
+                pool.execute(new TalkingProxyThread(clientSocket, serverSocket, listener));
+                pool.execute(new TalkingServerThread(clientSocket, serverSocket, listener));
             }
         }
     }

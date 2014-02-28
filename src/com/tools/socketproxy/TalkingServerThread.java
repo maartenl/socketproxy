@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
  *
  * @author maartenl
  */
-class TalkingServerThread extends Thread
+class TalkingServerThread implements Runnable
 {
 
     private static final Logger logger = Logger.getLogger(TalkingServerThread.class.getName());
@@ -62,7 +62,6 @@ class TalkingServerThread extends Thread
 
     TalkingServerThread(Socket clientSocket, Socket serverSocket, @Nonnull SocketListener listener)
     {
-        super("TalkingServerThread");
         this.listener = listener;
         this.clientSocket = clientSocket;
         this.serverSocket = serverSocket;
@@ -71,7 +70,7 @@ class TalkingServerThread extends Thread
     @Override
     public void run()
     {
-        logger.log(Level.FINE, "{0}.run()", this.getName());
+        logger.log(Level.FINE, "run()");
         try (PrintWriter client_out = new PrintWriter(clientSocket.getOutputStream(), true);
                 BufferedReader server_in = new BufferedReader(
                         new InputStreamReader(serverSocket.getInputStream()));)
@@ -111,7 +110,8 @@ class TalkingServerThread extends Thread
             }
         } catch (IOException ex)
         {
-            logger.log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex.getMessage());
+            logger.log(Level.FINEST, null, ex);
         }
 
         listener.communication(messages);

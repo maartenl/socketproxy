@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author maartenl
  */
-class TalkingProxyThread extends Thread
+class TalkingProxyThread implements Runnable
 {
 
     private static final Logger logger = Logger.getLogger(TalkingProxyThread.class.getName());
@@ -55,7 +55,6 @@ class TalkingProxyThread extends Thread
 
     TalkingProxyThread(Socket clientSocket, Socket serverSocket, SocketListener listener)
     {
-        super("TalkingProxyThread");
         this.clientSocket = clientSocket;
         this.serverSocket = serverSocket;
 
@@ -77,7 +76,7 @@ class TalkingProxyThread extends Thread
     @Override
     public void run()
     {
-        logger.log(Level.FINE, "{0}.run()", this.getName());
+        logger.log(Level.FINE, "run()");
         try (
                 BufferedReader client_in = new BufferedReader(
                         new InputStreamReader(
@@ -105,10 +104,10 @@ class TalkingProxyThread extends Thread
             }
             messages.add(new Message(TransportEnum.CLIENT_CLOSED_CONNECTION));
             logger.fine("client closed");
-
                         } catch (IOException ex)
                         {
-                            logger.log(Level.SEVERE, null, ex);
+                            logger.log(Level.SEVERE, null, ex.getMessage());
+                            logger.log(Level.FINEST, null, ex);
                         } finally
                         {
                             try
@@ -125,7 +124,8 @@ class TalkingProxyThread extends Thread
                                 }
                             } catch (IOException ex)
                             {
-                                Logger.getLogger(TalkingProxyThread.class.getName()).log(Level.SEVERE, null, ex);
+                                logger.log(Level.SEVERE, null, ex.getMessage());
+                                logger.log(Level.FINEST, null, ex);
                             }
                         }
                         listener.communication(messages);
