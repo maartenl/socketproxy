@@ -62,7 +62,6 @@ public class SocketProxyServer
      * @param proxyPort the port that this deamon will listen on
      * @param serverPort the port that this daemon will forward all messages to
      * the <i>actual</i> server.
-     * @throws IOException
      */
     public SocketProxyServer(@Nonnull int proxyPort, @Nonnull String serverHost, @Nonnull int serverPort)
     {
