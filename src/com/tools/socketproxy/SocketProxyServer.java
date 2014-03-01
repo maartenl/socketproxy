@@ -29,15 +29,14 @@ import javax.annotation.Nonnull;
 /**
  * A fairly simple socket server.
  * <img src="../../../images/SocketProxyServer.png"/>
- * @startuml
- * SocketProxyServer: +startServer()
- * SocketProxyServer: +addListener(listener: SocketListener)
- * SocketListener <-- SocketProxyServer
- * TalkingProxyThread <-- SocketProxyServer
- * TalkingServerThread <-- SocketProxyServer
- * @enduml
- * @author maartenl
- * @see
+ *
+ * @startuml SocketProxyServer: +startServer() SocketProxyServer:
+ * +addListener(listener: SocketListener) SocketListener <-- SocketProxyServer
+ * TalkingProxyThread <-- SocketProxyServer TalkingServerThread <--
+ * SocketProxyServer @enduml @autho r maartenl
+ * @
+ * s
+ * ee
  * http://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html
  */
 public class SocketProxyServer
@@ -85,12 +84,15 @@ public class SocketProxyServer
             {
                 final Socket clientSocket = proxyServerSocket.accept();
                 logger.fine("Connection accepted");
-                Socket serverSocket = new Socket(serverHost, serverPort);                
+                Conversation conversation = new Conversation(
+                        clientSocket.getInetAddress().getCanonicalHostName(), 
+                        clientSocket.getInetAddress().getHostAddress());
+                Socket serverSocket = new Socket(serverHost, serverPort);
                 serverSocket.setSoTimeout(SOCKET_TIMEOUT);
                 serverSocket.setKeepAlive(false);
                 serverSocket.setSoLinger(false, 0);
-                pool.execute(new TalkingProxyThread(clientSocket, serverSocket, listener));
-                pool.execute(new TalkingServerThread(clientSocket, serverSocket, listener));
+                pool.execute(new TalkingProxyThread(clientSocket, serverSocket, listener, conversation));
+                pool.execute(new TalkingServerThread(clientSocket, serverSocket, listener, conversation));
             }
         }
     }

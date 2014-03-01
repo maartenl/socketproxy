@@ -28,8 +28,9 @@ public interface SocketListener
 {
     /**
      * Messages concerning one socket session.
-     * @param messages list of messages in order of arrival.
+     * @param conversation the entire conversation, including some general parameters
+     * that apply to the entire conversation.
      */
-    public void communication(@Nonnull List<Message> messages);
+    public void communication(@Nonnull Conversation conversation);
 
 }

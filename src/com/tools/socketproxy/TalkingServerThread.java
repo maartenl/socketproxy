@@ -41,7 +41,7 @@ class TalkingServerThread implements Runnable
 
     private final SocketListener listener;
 
-    private final List<Message> messages = new ArrayList<>();
+    private final Conversation conversation;
     /**
      * The socket on which the client connection entered the system.
      */
@@ -60,11 +60,12 @@ class TalkingServerThread implements Runnable
         return sb.toString();
     }
 
-    TalkingServerThread(Socket clientSocket, Socket serverSocket, @Nonnull SocketListener listener)
+    public TalkingServerThread(Socket clientSocket, Socket serverSocket, @Nonnull SocketListener listener, Conversation conversation)
     {
         this.listener = listener;
         this.clientSocket = clientSocket;
         this.serverSocket = serverSocket;
+        this.conversation = conversation;
     }
 
     @Override
@@ -89,14 +90,14 @@ class TalkingServerThread implements Runnable
                 {
                     logger.log(Level.FINE, "<{0}", new String(buffer, 0, numbers));
                     logger.log(Level.FINE, "<{0}", msgAsString(buffer, numbers));
-                    messages.add(new Message(TransportEnum.SERVER, buffer, numbers));
+                    conversation.addMessage(new Message(TransportEnum.SERVER, buffer, numbers));
                     logger.fine("Writing to client");
                     client_out.write(buffer, 0, numbers);
                     logger.fine("Flushing client");
                     client_out.flush();
                 }
             }
-            messages.add(new Message(TransportEnum.SERVER_CLOSED_CONNECTION));
+            conversation.addMessage(new Message(TransportEnum.SERVER_CLOSED_CONNECTION));
             logger.fine("server closed");
             if (!serverSocket.isClosed())
             {
@@ -114,7 +115,7 @@ class TalkingServerThread implements Runnable
             logger.log(Level.FINEST, null, ex);
         }
 
-        listener.communication(messages);
+        listener.communication(conversation);
     }
 
 }

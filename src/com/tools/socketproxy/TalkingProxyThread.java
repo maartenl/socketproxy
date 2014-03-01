@@ -39,26 +39,22 @@ class TalkingProxyThread implements Runnable
     public static final int BUFFER_SIZE = 1024;
 
     /**
-     * default timeout in milliseconds. 30 seconds outta do it.
-     */
-    private static final int SOCKET_TIMEOUT = 30000;
-
-    /**
      * The socket on which the client connection entered the system.
      */
     private Socket clientSocket = null;
+    
     private Socket serverSocket = null;
 
     private final SocketListener listener;
 
-    private final List<Message> messages = new ArrayList<>();
+    private final Conversation conversation;
 
-    TalkingProxyThread(Socket clientSocket, Socket serverSocket, SocketListener listener)
+    public TalkingProxyThread(Socket clientSocket, Socket serverSocket, SocketListener listener, Conversation conversation)
     {
         this.clientSocket = clientSocket;
         this.serverSocket = serverSocket;
-
         this.listener = listener;
+        this.conversation = conversation;
     }
 
     public String msgAsString(char[] msg, int length)
@@ -95,14 +91,14 @@ class TalkingProxyThread implements Runnable
                 {
                     logger.log(Level.FINE, ">{0}", new String(buffer, 0, numbers));
                     logger.log(Level.FINE, ">{0}", msgAsString(buffer, numbers));
-                    messages.add(new Message(TransportEnum.CLIENT, buffer, numbers));
+                    conversation.addMessage(new Message(TransportEnum.CLIENT, buffer, numbers));
                     logger.fine("Writing to server");
                     server_out.write(buffer, 0, numbers);
                     logger.fine("Flushing server");
                     server_out.flush();
                 }
             }
-            messages.add(new Message(TransportEnum.CLIENT_CLOSED_CONNECTION));
+            conversation.addMessage(new Message(TransportEnum.CLIENT_CLOSED_CONNECTION));
             logger.fine("client closed");
                         } catch (IOException ex)
                         {
@@ -128,7 +124,7 @@ class TalkingProxyThread implements Runnable
                                 logger.log(Level.FINEST, null, ex);
                             }
                         }
-                        listener.communication(messages);
+                        listener.communication(conversation);
     }
 
 }

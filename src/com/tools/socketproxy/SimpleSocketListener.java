@@ -16,6 +16,7 @@
  */
 package com.tools.socketproxy;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -30,29 +31,35 @@ class SimpleSocketListener implements SocketListener
     }
 
     @Override
-    public void communication(List<Message> messages)
+    public void communication(Conversation conversation)
     {
-        for (Message message : messages)
+        List<Message> list = conversation.getMessages();
+        System.out.println("Client host:" + conversation.getHostName());
+        System.out.println("Client address:" + conversation.getHostAddress());
+        synchronized (list)
         {
-            switch (message.getTransport())
+            Iterator<Message> i = list.iterator(); // Must be in synchronized block
+            while (i.hasNext())
             {
-                case CLIENT:
-                    System.out.println("received from client:{" + new String(message.getMessage()) + "}");
-                    break;
-                case SERVER:
-                    System.out.println("received from server:{" + new String(message.getMessage()) + "}");
-                    break;
-                case CLIENT_CLOSED_CONNECTION:
-                    System.out.println("client closed connection.");
-                    break;
-                case SERVER_CLOSED_CONNECTION:
-                    System.out.println("server closed connection.");
-                    break;
-                default:
-                    throw new RuntimeException("unknown transport type : " + message.getTransport());
+                Message message = i.next();
+                switch (message.getTransport())
+                {
+                    case CLIENT:
+                        System.out.println("received from client:{" + new String(message.getMessage()) + "}");
+                        break;
+                    case SERVER:
+                        System.out.println("received from server:{" + new String(message.getMessage()) + "}");
+                        break;
+                    case CLIENT_CLOSED_CONNECTION:
+                        System.out.println("client closed connection.");
+                        break;
+                    case SERVER_CLOSED_CONNECTION:
+                        System.out.println("server closed connection.");
+                        break;
+                    default:
+                        throw new RuntimeException("unknown transport type : " + message.getTransport());
+                }
             }
-
         }
     }
-
 }
