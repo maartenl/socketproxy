@@ -21,7 +21,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -33,11 +32,8 @@ import javax.annotation.Nonnull;
  * @startuml SocketProxyServer: +startServer() SocketProxyServer:
  * +addListener(listener: SocketListener) SocketListener <-- SocketProxyServer
  * TalkingProxyThread <-- SocketProxyServer TalkingServerThread <--
- * SocketProxyServer @enduml @autho r maartenl
- * @
- * s
- * ee
- * http://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html
+ * SocketProxyServer @enduml @autho r maartenl @ s ee
+ * http://docs.oracle.com/javase/ tutorial/networking/sockets/clientServer.html
  */
 public class SocketProxyServer
 {
@@ -47,7 +43,7 @@ public class SocketProxyServer
     /**
      * default timeout in milliseconds. 30 seconds ought to do it.
      */
-    private static final int SOCKET_TIMEOUT = 30000;
+    private static final int SOCKET_TIMEOUT = 5000;
 
     private SocketListener listener;
 
@@ -83,16 +79,30 @@ public class SocketProxyServer
             while (listening)
             {
                 final Socket clientSocket = proxyServerSocket.accept();
+                clientSocket.setSoTimeout(SOCKET_TIMEOUT);
+                clientSocket.setKeepAlive(false);
+                clientSocket.setSoLinger(false, 0);
                 logger.fine("Connection accepted");
                 Conversation conversation = new Conversation(
-                        clientSocket.getInetAddress().getCanonicalHostName(), 
+                        clientSocket.getInetAddress().getCanonicalHostName(),
                         clientSocket.getInetAddress().getHostAddress());
-                Socket serverSocket = new Socket(serverHost, serverPort);
-                serverSocket.setSoTimeout(SOCKET_TIMEOUT);
-                serverSocket.setKeepAlive(false);
-                serverSocket.setSoLinger(false, 0);
+                Socket serverSocket = null;
+                try
+                {
+                    serverSocket = new Socket(serverHost, serverPort);
+                    serverSocket.setSoTimeout(SOCKET_TIMEOUT);
+                    serverSocket.setKeepAlive(false);
+                    serverSocket.setSoLinger(false, 0);
+                } catch (IOException ex)
+                {
+                    logger.log(Level.SEVERE, ex.getMessage(), ex);
+                    conversation.addMessage(new Message(TransportEnum.CANNOT_CONNECT_TO_SERVER));
+                }
                 pool.execute(new TalkingProxyThread(clientSocket, serverSocket, listener, conversation));
-                pool.execute(new TalkingServerThread(clientSocket, serverSocket, listener, conversation));
+                if (serverSocket != null)
+                {
+                    pool.execute(new TalkingServerThread(clientSocket, serverSocket, listener, conversation));
+                }
             }
         }
     }

@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +40,7 @@ class TalkingProxyThread implements Runnable
      * The socket on which the client connection entered the system.
      */
     private Socket clientSocket = null;
-    
+
     private Socket serverSocket = null;
 
     private final SocketListener listener;
@@ -76,7 +74,9 @@ class TalkingProxyThread implements Runnable
         try (
                 BufferedReader client_in = new BufferedReader(
                         new InputStreamReader(
-                                clientSocket.getInputStream())); PrintWriter server_out = new PrintWriter(serverSocket.getOutputStream(), true);)
+                                clientSocket.getInputStream()));
+                PrintWriter server_out = serverSocket == null ? null : 
+                        new PrintWriter(serverSocket.getOutputStream(), true);)
         {
             char[] buffer = new char[BUFFER_SIZE];
 
@@ -92,23 +92,25 @@ class TalkingProxyThread implements Runnable
                     logger.log(Level.FINE, ">{0}", new String(buffer, 0, numbers));
                     logger.log(Level.FINE, ">{0}", msgAsString(buffer, numbers));
                     conversation.addMessage(new Message(TransportEnum.CLIENT, buffer, numbers));
-                    logger.fine("Writing to server");
-                    server_out.write(buffer, 0, numbers);
-                    logger.fine("Flushing server");
-                    server_out.flush();
+                    if (server_out != null)
+                    {
+                        logger.fine("Writing to server");
+                        server_out.write(buffer, 0, numbers);
+                        logger.fine("Flushing server");
+                        server_out.flush();
+                    }
                 }
             }
             conversation.addMessage(new Message(TransportEnum.CLIENT_CLOSED_CONNECTION));
             logger.fine("client closed");
                         } catch (IOException ex)
                         {
-                            logger.log(Level.SEVERE, null, ex.getMessage());
-                            logger.log(Level.FINEST, null, ex);
+                            logger.log(Level.SEVERE,  ex.getMessage(), ex);
                         } finally
                         {
                             try
                             {
-                                if (!serverSocket.isClosed())
+                                if (serverSocket != null && !serverSocket.isClosed())
                                 {
                                     serverSocket.shutdownOutput();
                                     serverSocket.close();
@@ -120,10 +122,10 @@ class TalkingProxyThread implements Runnable
                                 }
                             } catch (IOException ex)
                             {
-                                logger.log(Level.SEVERE, null, ex.getMessage());
-                                logger.log(Level.FINEST, null, ex);
+                                logger.log(Level.SEVERE,  ex.getMessage(), ex);
                             }
                         }
+
                         listener.communication(conversation);
     }
 

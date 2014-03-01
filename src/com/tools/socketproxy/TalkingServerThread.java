@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -111,8 +109,7 @@ class TalkingServerThread implements Runnable
             }
         } catch (IOException ex)
         {
-            logger.log(Level.SEVERE, null, ex.getMessage());
-            logger.log(Level.FINEST, null, ex);
+            logger.log(Level.SEVERE,  ex.getMessage(), ex);
         }
 
         listener.communication(conversation);

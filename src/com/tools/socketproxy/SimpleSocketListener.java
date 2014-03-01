@@ -56,6 +56,9 @@ class SimpleSocketListener implements SocketListener
                     case SERVER_CLOSED_CONNECTION:
                         System.out.println("server closed connection.");
                         break;
+                    case CANNOT_CONNECT_TO_SERVER:
+                        System.out.println("connection to server could not be established.");
+                        break;
                     default:
                         throw new RuntimeException("unknown transport type : " + message.getTransport());
                 }

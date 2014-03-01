@@ -14,13 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.tools.socketproxy;
 
 /**
- *
+ * For debugging purposes. If we're not interested in the contents,
+ * but only want to see the logging.
  * @author maartenl
  */
-public enum TransportEnum {
-    SERVER, CLIENT, CLIENT_CLOSED_CONNECTION, SERVER_CLOSED_CONNECTION, CANNOT_CONNECT_TO_SERVER
+class EmptySocketListener implements SocketListener
+{
+
+    public EmptySocketListener()
+    {
+    }
+
+    @Override
+    public void communication(Conversation conversation)
+    {
+    }
 }

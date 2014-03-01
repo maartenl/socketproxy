@@ -19,7 +19,7 @@ package com.tools.socketproxy;
 import java.io.IOException;
 
 /**
- * A probably command line would be: "java -classpath socketproxy.jar Main 3300
+ * A probable command line would be: "java -classpath socketproxy.jar com.tools.socketproxy.Main 3300
  * foreign.server.com 80".
  *
  * @author maartenl
@@ -38,6 +38,7 @@ public class Main {
         String serverHost = args[1];
         int serverPort = Integer.parseInt(args[2]);
         SocketProxyServer proxy = new SocketProxyServer(proxyPort, serverHost, serverPort);
+        // SocketListener listener = new EmptySocketListener();
         SocketListener listener = new SimpleSocketListener();
         proxy.addListener(listener);
         proxy.startServer();
