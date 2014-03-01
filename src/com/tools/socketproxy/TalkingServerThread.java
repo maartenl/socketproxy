@@ -111,8 +111,6 @@ class TalkingServerThread implements Runnable
         {
             logger.log(Level.SEVERE,  ex.getMessage(), ex);
         }
-
-        listener.communication(conversation);
     }
 
 }
