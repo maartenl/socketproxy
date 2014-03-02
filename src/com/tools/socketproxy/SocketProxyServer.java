@@ -29,10 +29,26 @@ import javax.annotation.Nonnull;
  * A fairly simple socket server.
  * <img src="../../../images/SocketProxyServer.png"/>
  *
- * @startuml SocketProxyServer: +startServer() SocketProxyServer:
- * +addListener(listener: SocketListener) SocketListener <-- SocketProxyServer
- * TalkingProxyThread <-- SocketProxyServer TalkingServerThread <--
- * SocketProxyServer @enduml @autho r maartenl @ s ee
+ * @startuml 
+ * interface SocketListener
+ * interface Runnable
+ * interface ExecutorService
+ * Runnable: +run()
+ * SocketProxyServer: +startServer() 
+ * SocketProxyServer: +addListener(listener: SocketListener) 
+ * SocketListener <-- SocketProxyServer
+ * TalkingProxyThread <-- SocketProxyServer 
+ * TalkingServerThread <-- SocketProxyServer 
+ * Runnable <|-- TalkingProxyThread
+ * Runnable <|-- TalkingServerThread
+ * ExecutorService <-- SocketProxyServer 
+ * ExecutorService <-- Executors
+ * ExecutorService : +execute(r: Runnable)
+ * Executors <-- SocketProxyServer 
+ * Executors: + {static} newFixedThreadPool(nThreads: int)
+ * @enduml 
+ * @author maartenl 
+ * @see
  * http://docs.oracle.com/javase/ tutorial/networking/sockets/clientServer.html
  */
 public class SocketProxyServer
@@ -54,12 +70,12 @@ public class SocketProxyServer
     private final String serverHost;
 
     /**
-     *
+     * Construction of the socket proxy server.
      * @param serverHost hostname/ip address of the server to forward messages
      * to.
-     * @param proxyPort the port that this deamon will listen on
+     * @param proxyPort the port that this deamon will listen on.
      * @param serverPort the port that this daemon will forward all messages to
-     * the <i>actual</i> server.
+     * on the <i>actual</i> server.
      */
     public SocketProxyServer(@Nonnull int proxyPort, @Nonnull String serverHost, @Nonnull int serverPort)
     {
@@ -68,6 +84,10 @@ public class SocketProxyServer
         this.serverHost = serverHost;
     }
 
+    /**
+     * Start the server... will not return.
+     * @throws IOException if something goes wrong.
+     */
     public void startServer() throws IOException
     {
         logger.log(Level.FINE, "Start listening on port {0}", proxyPort);
@@ -101,12 +121,19 @@ public class SocketProxyServer
                 pool.execute(new TalkingProxyThread(clientSocket, serverSocket, listener, conversation));
                 if (serverSocket != null)
                 {
-                    pool.execute(new TalkingServerThread(clientSocket, serverSocket, listener, conversation));
+                    pool.execute(new TalkingServerThread(clientSocket, serverSocket, conversation));
                 }
             }
         }
     }
 
+    /**
+     * Adds a listener to the proxy socket server. Bear in mind that currently there
+     * is only one listener allowed. Calling this method a second time will
+     * replace the existing listener. 
+     * @todo yes, I know, the naming is wrong...
+     * @param listener the listener to report conversations to.
+     */
     public void addListener(SocketListener listener)
     {
         this.listener = listener;

@@ -20,15 +20,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- *
+ * Just dumps the entire conversation to the System.out.
  * @author maartenl
  */
 class SimpleSocketListener implements SocketListener
 {
-
-    public SimpleSocketListener()
-    {
-    }
 
     @Override
     public void communication(Conversation conversation)

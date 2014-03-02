@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 /**
  * The client is talking to us, and we're sending it onto the server.
- *
+ * @see TalkingServerThread
  * @author maartenl
  */
 class TalkingProxyThread implements Runnable
@@ -41,12 +41,30 @@ class TalkingProxyThread implements Runnable
      */
     private Socket clientSocket = null;
 
+    /**
+     * The socket for this socket server to communicate with the server.
+     */
     private Socket serverSocket = null;
 
+    /**
+     * The communication listener to report to.
+     */
     private final SocketListener listener;
 
+    /**
+     * The conversation that needs to record everything.
+     */
     private final Conversation conversation;
 
+    /**
+     * <p>Construction.</p><p><b>NOTE:</b> It is allowed for the serverSocket to be 
+     * null. In this case the messages from the client are not forwarded to the
+     * server, but they are recorded in the conversation.</p>
+     * @param clientSocket the socket of the client
+     * @param serverSocket the socket of the server
+     * @param listener the listener to report to
+     * @param conversation the conversation to record
+     */
     public TalkingProxyThread(Socket clientSocket, Socket serverSocket, SocketListener listener, Conversation conversation)
     {
         this.clientSocket = clientSocket;
@@ -55,6 +73,12 @@ class TalkingProxyThread implements Runnable
         this.conversation = conversation;
     }
 
+    /**
+     * Translate the message as a human readable array of bytes. 
+     * @param msg the original message
+     * @param length the length of the message
+     * @return a String showing the bytes, for example "0x0b 0x7a 0x51".
+     */
     public String msgAsString(char[] msg, int length)
     {
         StringBuilder sb = new StringBuilder("");

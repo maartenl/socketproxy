@@ -24,12 +24,9 @@ package com.tools.socketproxy;
 class EmptySocketListener implements SocketListener
 {
 
-    public EmptySocketListener()
-    {
-    }
-
     @Override
     public void communication(Conversation conversation)
     {
+        // nothing to see here, move along!
     }
 }

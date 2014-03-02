@@ -23,11 +23,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 
 /**
  * The server is talking to us, and we're sending it onto the client.
- *
+ * @see TalkingProxyThread
  * @author maartenl
  */
 class TalkingServerThread implements Runnable
@@ -37,13 +36,19 @@ class TalkingServerThread implements Runnable
 
     public static final int BUFFER_SIZE = 1024;
 
-    private final SocketListener listener;
-
+    /**
+     * The conversation that needs to record everything.
+     */
     private final Conversation conversation;
+
     /**
      * The socket on which the client connection entered the system.
      */
     private Socket clientSocket = null;
+
+    /**
+     * The socket for this socket server to communicate with the server.
+     */
     private Socket serverSocket = null;
 
     public String msgAsString(char[] msg, int length)
@@ -58,9 +63,14 @@ class TalkingServerThread implements Runnable
         return sb.toString();
     }
 
-    public TalkingServerThread(Socket clientSocket, Socket serverSocket, @Nonnull SocketListener listener, Conversation conversation)
+    /**
+     * Construction.
+     * @param clientSocket the socket of the client
+     * @param serverSocket the socket of the server
+     * @param conversation the conversation to record
+     */
+    public TalkingServerThread(Socket clientSocket, Socket serverSocket, Conversation conversation)
     {
-        this.listener = listener;
         this.clientSocket = clientSocket;
         this.serverSocket = serverSocket;
         this.conversation = conversation;

@@ -17,7 +17,6 @@
 
 package com.tools.socketproxy;
 
-import java.util.List;
 import javax.annotation.Nonnull;
 
 /**
@@ -27,7 +26,7 @@ import javax.annotation.Nonnull;
 public interface SocketListener
 {
     /**
-     * Messages concerning one socket session.
+     * Call back containing the entire conversation of one socket session.
      * @param conversation the entire conversation, including some general parameters
      * that apply to the entire conversation.
      */

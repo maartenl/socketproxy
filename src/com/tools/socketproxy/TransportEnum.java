@@ -18,9 +18,30 @@
 package com.tools.socketproxy;
 
 /**
- *
+ * What kind of message is it?
  * @author maartenl
  */
 public enum TransportEnum {
-    SERVER, CLIENT, CLIENT_CLOSED_CONNECTION, SERVER_CLOSED_CONNECTION, CANNOT_CONNECT_TO_SERVER
+    /**
+     * From the server to the client.
+     */
+    SERVER, 
+    /**
+     * From the client to the server.
+     */
+    CLIENT, 
+    /**
+     * Client has closed the connection. Usually no message attached.
+     */
+    CLIENT_CLOSED_CONNECTION, 
+    /**
+     * Server has closed the connection. Usually no message attached.
+     */
+    SERVER_CLOSED_CONNECTION, 
+    /**
+     * Unable to connect to the server. Though this is a problem,
+     * the proxy socket server will still accept incoming connections
+     * and record their... one-sided... conversation.
+     */
+    CANNOT_CONNECT_TO_SERVER
 }

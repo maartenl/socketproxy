@@ -19,25 +19,28 @@ package com.tools.socketproxy;
 import java.io.IOException;
 
 /**
- * A probable command line would be: "java -classpath socketproxy.jar com.tools.socketproxy.Main 3300
- * foreign.server.com 80".
+ * The main class, actually more for debugging than anything else. A probable
+ * command line would be: "java -classpath socketproxy.jar
+ * com.tools.socketproxy.Main 3300 foreign.server.com 80".
  *
  * @author maartenl
  */
-public class Main {
+public class Main
+{
 
     /**
-     * @param args the command line arguments, needs at least three,
-     * the proxy port to listen to for client connections, 
-     * the hostname of the server and port of the
-     * server to redirect traffic to.
+     * @param args the command line arguments, needs at least three, the proxy
+     * port to listen to for client connections, the hostname of the server and
+     * port of the server to redirect traffic to.
      * @throws java.io.IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException
+    {
         int proxyPort = Integer.parseInt(args[0]);
         String serverHost = args[1];
         int serverPort = Integer.parseInt(args[2]);
         SocketProxyServer proxy = new SocketProxyServer(proxyPort, serverHost, serverPort);
+        // uncomment this line, if you're not interested in the communication itself        
         // SocketListener listener = new EmptySocketListener();
         SocketListener listener = new SimpleSocketListener();
         proxy.addListener(listener);

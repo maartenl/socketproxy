@@ -14,53 +14,70 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.tools.socketproxy;
 
 import java.util.Arrays;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
+ * A message from client to server or vice versa.
  *
  * @author maartenl
  */
-public class Message {
+public class Message
+{
 
     private final char[] message;
-    
+
     private final TransportEnum transport;
 
     /**
+     * Initializes the message.
      *
-     * @param transport
-     * @param message
-     * @param size
+     * @param transport who is sending to whom.
+     * @param message the message that was sent.
+     * @param size the size of the message
      */
-    public Message(@Nonnull TransportEnum transport, @Nonnull char[] message, int size) {
+    public Message(@Nonnull TransportEnum transport, @Nonnull char[] message, int size)
+    {
         this.message = Arrays.copyOf(message, size);
         this.transport = transport;
     }
 
-    Message(TransportEnum transport)
+    /**
+     * Empty message. Good for indicating if someone has closed the connection.
+     *
+     * @param transport for example
+     * {@link TransportEnum#CLIENT_CLOSED_CONNECTION} or
+     * {@link TransportEnum#SERVER_CLOSED_CONNECTION}.
+     */
+    public Message(TransportEnum transport)
     {
         this.transport = transport;
         this.message = null;
     }
 
     /**
+     * The message sent.
+     *
      * @return the message
      */
-    public @Nonnull char[] getMessage() {
+    public @Nullable
+    char[] getMessage()
+    {
         return message;
     }
 
     /**
-     * @return the transport
+     * Who is sending to whom.
+     *
+     * @return the transport indicates the originating party.
      */
-    public @Nonnull TransportEnum getTransport() {
+    public @Nonnull
+    TransportEnum getTransport()
+    {
         return transport;
     }
-    
-    
-            
+
 }
