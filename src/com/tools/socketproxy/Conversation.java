@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Indicates an entire conversion between the client and the server. The
+ * Indicates an entire conversation between the client and the server. The
  * conversation is recorded by this socketproxy.
  * @author maartenl
  */
@@ -35,7 +35,7 @@ public class Conversation
     private final String hostAddress;
 
     /**
-     * Create/start a conversation.
+     * Create/start a conversation recording session.
      * @param hostName the name of the client
      * @param hostAddress the address of the client
      */
